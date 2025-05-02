@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using fluentuiBase.Shared.ErrorOr;
 using fluentuiBase.Shared.Models;
 using fluentuiBase.Shared.Tools;
 using fluentuiBase.Store.Dtos;
@@ -16,9 +17,9 @@ using System.Xml;
 namespace fluentuiBase.Store.Commands
 {
 
-    public record GetUserQuery(string userId) : IRequest<UserDto>;
+    public record GetUserQuery(string userId) : IRequest<ErrorOr<UserDto>>;
 
-    public class GetUserQueryHandler: IRequestHandler<GetUserQuery, UserDto>
+    public class GetUserQueryHandler: IRequestHandler<GetUserQuery,ErrorOr<UserDto>>
     {
         private readonly IMapper mapper;
         private readonly IBlazeLogDbContext context;
@@ -27,22 +28,24 @@ namespace fluentuiBase.Store.Commands
             context = ctx;
             mapper = mp;
         }
-        public async Task<UserDto> Handle(GetUserQuery query,CancellationToken cancellationToken)
+        public async Task<ErrorOr<UserDto>> Handle(GetUserQuery query,CancellationToken cancellationToken)
         {
             var data = context.CoreUsers.AsQueryable();
             var user = await data.FirstOrDefaultAsync(e => e.UserId == query.userId);
             if(user!=null)
                 return mapper.Map<UserDto>(user);
-            return null;
+
+            return Error.NotFound("UserNotFound", $"User not found for id {query.userId}");
+
         }
         
     }
 
 
-    public record GetUsersQuery(string AskSearch,int Start=1,int Size=0,params SortDescription[] Sorts): IRequest<List<UserDto>>;
+    public record GetUsersQuery(string AskSearch,int Start=1,int Size=0,params SortDescription[] Sorts): IRequest<ErrorOr< List<UserDto>>>;
 
 
-    public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<UserDto>>
+    public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery,ErrorOr<List<UserDto>>>
     {
         private readonly IBlazeLogDbContext context;
         private readonly IMapper mapper;
@@ -51,7 +54,7 @@ namespace fluentuiBase.Store.Commands
             context = ctx;
             mapper = mp;    
         }
-        public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<List<UserDto>>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
             var query = context.CoreUsers.AsQueryable();
             var size = request.Size == 0 ? CN.Setting.PageSize: request.Size;
@@ -67,7 +70,6 @@ namespace fluentuiBase.Store.Commands
             }
 
             return await query.ProjectTo<UserDto>(mapper.ConfigurationProvider).ToListAsync(cancellationToken);
-
             
         }
     }

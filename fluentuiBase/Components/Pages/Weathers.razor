@@ -55,9 +55,10 @@ else
 
         if(forecastDtos.Count < Total)
         {
+            var result = await Commander.Send(new GetWeatherForecastsQuery(Total, Start, Size));
 
 
-            forecastDtos.AddRange(await Commander.Send(new GetWeatherForecastsQuery(Total, Start, Size)));
+            forecastDtos.AddRange(result.Value);
 
             Start = forecastDtos.Count + 1;
         }

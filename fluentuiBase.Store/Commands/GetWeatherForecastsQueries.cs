@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using fluentuiBase.Shared.ErrorOr;
 
 namespace fluentuiBase.Store.Commands
 {
-    public record GetWeatherForecastsQuery(int Total, int Start = 1, int Size = 0) : IRequest<List<WeatherForecastDto>>;
+    public record GetWeatherForecastsQuery(int Total, int Start = 1, int Size = 0) : IRequest<ErrorOr<List<WeatherForecastDto>>>;
 
-    public class GetWeatherForcecastsQueryHandler: IRequestHandler<GetWeatherForecastsQuery, List<WeatherForecastDto>>
+    public class GetWeatherForcecastsQueryHandler: IRequestHandler<GetWeatherForecastsQuery,ErrorOr<List<WeatherForecastDto>>>
     {
         public readonly IBlazeLogDbContext context;
         public readonly IMapper mapper;
@@ -24,7 +25,7 @@ namespace fluentuiBase.Store.Commands
         }
 
 
-        public async Task<List<WeatherForecastDto>> Handle(GetWeatherForecastsQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<List<WeatherForecastDto>>> Handle(GetWeatherForecastsQuery request, CancellationToken cancellationToken)
         {
             var rng = new Random();
             var size = request.Size == 0 ? CN.Setting.PageSize : request.Size;

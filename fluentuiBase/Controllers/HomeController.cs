@@ -37,12 +37,24 @@ public class HomeController : Controller
     {
         var cn = new CancellationToken();
         var user = await commander.Send( new GetUserQuery("UXKBS"),cn);
-        var authuser = mapper.Map<AuthUserModel>(user);
+        if (user.IsError)
+        {
+            _logger.LogDebug(user.FirstError.Description);
+
+        }
+        var authuser = mapper.Map<AuthUserModel>(user.Value);
         var token = tokener.CreateToken(authuser);
         var resultuser = tokener.DecodeTokenToUser(token);
 
         var result = await commander.Send(query, cn);
-        return View(result);
+
+        if(result.IsError)
+        {
+            _logger.LogDebug(result.FirstError.Description);
+            return View(new List<UserDto>());
+        }
+
+        return View(result.Value);
     }
 
     public IActionResult Weather(int total =100)
@@ -52,45 +64,12 @@ public class HomeController : Controller
 
     }
 
-    public IResult Login()
-    {
-        return this.RazorView<Login>();
-    }
-
     public IResult Sample(bool hideSideBar = false)
     {
         return this.RazorView<Sample>(new { HideSideBar=hideSideBar });
     }
 
-    public IActionResult Privacy()
-    {
-        string? cultureCookieValue = null;
-        this.HttpContext.Request.Cookies.TryGetValue(
-            CookieRequestCultureProvider.DefaultCookieName, out cultureCookieValue);
 
-
-        var model = ViewModelFactory.CreateViewModelWithResource<PrivacyViewModel>(_stringLocalizer);
-        string text = "Thread CurrentUICulture is [" + @Thread.CurrentThread.CurrentUICulture.ToString() + "] ; ";
-        text += "Thread CurrentCulture is [" + @Thread.CurrentThread.CurrentCulture.ToString() + "]";
-
-        model.Culture = text;
-
-        return View(model);
-    }
-
-    public IActionResult ChangeLang(ChangeLangModel model)
-    {
-        if(model.IsSubmit)
-        {
-            this.HttpContext.SetLangCookie(model.SelectedLanguage,year:1,day:0);
-
-            return LocalRedirect("/");
-
-        }
-        model = ViewModelFactory.CreateChangeLangModel();
-
-        return View(model);
-    }
 
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
