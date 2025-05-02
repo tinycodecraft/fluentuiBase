@@ -1,12 +1,17 @@
 ﻿using MediatR;
 using fluentuiBase.Shared.ErrorOr;
 using fluentuiBase.Shared.Models;
+using System.Security.Principal;
 
 namespace fluentuiBase.Shared
 {
 
     public class Interfaces
     {
+        public interface IAuthService
+        {
+            Task<ErrorOr<IPrincipal>> Authenticate(string userid, string password);
+        }
 
         public interface ITokenService
         {

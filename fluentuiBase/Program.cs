@@ -4,7 +4,11 @@ using fluentuiBase.Middlewares;
 using fluentuiBase.Models;
 using fluentuiBase.Resources;
 using fluentuiBase.Shared.Tools;
+using fluentuiBase.Store.Commands;
 using fluentuiBase.Store.Setup;
+using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -89,6 +93,77 @@ builder.Services.AddCommandMapper();
 
 builder.Services.AddStore(builder.Configuration);
 
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<HttpClient>();
+
+//Add authentication service
+
+builder.Services.AddScoped<IN.IAuthService, AuthService>();
+
+//Add Cookie Auth
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = $"{CN.Setting.AuthorizeCookieKey}";
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.HttpOnly = true;
+        options.LoginPath = "/Home/Login";
+        //options.LogoutPath = "/Account/Logout";
+        //options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        options.SlidingExpiration = true;
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
+            {
+
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                context.Response.StatusCode = 403;
+                return Task.CompletedTask;
+            },
+
+            OnValidatePrincipal = async context =>
+            {
+                var tokenService = context.HttpContext.RequestServices.GetRequiredService<IN.ITokenService>();
+                ISender commander = context.HttpContext.RequestServices.GetRequiredService<IMediator>();
+
+                if (context.Principal != null)
+                {
+                    var user = tokenService.DecodeTokenToUser(context.Principal.Claims.First(x => x.Type == "token").Value);
+                    if (user == null)
+                    {
+                        context.RejectPrincipal();
+                        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
+                    else
+                    {
+                        var result = await commander.Send(new GetUserQuery(user.userID));
+
+                        if (result.IsError)
+                        {
+                            context.RejectPrincipal();
+                            await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    Log.Warning("No principal found");
+                }
+
+            }
+        };
+    });
+
+
 
 // Add services to the container.
 //builder.Services.AddControllersWithViews();
@@ -122,6 +197,16 @@ builder.Services.AddSession(options =>
     options.Cookie.Name = $"{typeof(Program).Assembly.GetName().Name}.Session";
 });
 
+//Add Anitforegery
+builder.Services.AddAntiforgery(
+    options =>
+    {
+        options.Cookie.Name = $"{CN.Setting.AppName}.Antiforgery";
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.HttpOnly = false;
+        options.HeaderName = "X-XSRF-TOKEN";
+    });
 
 var app = builder.Build();
 
@@ -133,7 +218,16 @@ app.UseRequestLocalization();
 
 app.UseApiExceptionHandling();
 
-app.MapGet("/api/hello", () => "Hello, World!");
+app.MapGet("/api/hello", () =>
+{
+    return Results.Ok("Hello World");
+});
+
+app.MapGroup("/api/" + nameof(AutocompleteGroup.weathers))    
+    .MapApiFor(AutocompleteGroup.weathers)
+    .WithTags(nameof(AutocompleteGroup.weathers));
+
+
 //test successful
 //app.MapGet("/api/throw", () => { throw new Exception("This is a test exception"); return Results.Ok("Not Ok"); });
 
@@ -165,6 +259,7 @@ app.UseRouting();
 //**this is for razor components
 //**not just element for mvc
 app.UseAntiforgery();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
