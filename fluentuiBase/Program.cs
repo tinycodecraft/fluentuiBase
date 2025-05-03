@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.FluentUI.AspNetCore.Components;
 using Serilog;
 using System.Text.Json.Serialization;
 
@@ -182,6 +183,11 @@ builder.Services
 .AddRazorComponents()
 .AddInteractiveServerComponents()
 .AddCircuitOptions(options => options.DetailedErrors = true); // for debugging razor components
+
+builder.Services.AddFluentUIComponents(options =>
+{
+    options.ValidateClassNames = false;
+});
 
 builder.WebHost.UseStaticWebAssets();
 

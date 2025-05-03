@@ -28,10 +28,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home"
                                asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                               asp-action="Login">Login</a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home"
                                asp-action="Sample">Sample</a>
@@ -40,14 +37,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home"
                                asp-action="Weather">Weather Forecast</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                               asp-action="ChangeLang">Change Language</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                               asp-action="Privacy">Privacy</a>
-                        </li>
+
                     </ul>
                 </div>
             </div>
@@ -66,8 +56,9 @@
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>    
+    <script src="~/js/site.js" asp-append-version="true"></script>  
+    <script src="_content/Microsoft.FluentUI.AspNetCore.Components/Microsoft.FluentUI.AspNetCore.Components.lib.module.js" type="module" async></script>
     <script src="_framework/blazor.web.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

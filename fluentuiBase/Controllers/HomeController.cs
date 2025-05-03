@@ -57,6 +57,7 @@ public class HomeController : Controller
         return View(result.Value);
     }
 
+
     public IActionResult Weather(int total =100)
     {
 
