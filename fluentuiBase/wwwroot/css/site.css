@@ -22,3 +22,7 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+#navmenu-toggle {
+    appearance: none;
+}
