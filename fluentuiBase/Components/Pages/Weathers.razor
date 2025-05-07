@@ -1,34 +1,49 @@
-﻿@inject ISender Commander
+﻿@using fluentuiBase.Components.Layout
+@using fluentuiBase.Control
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.Infrastructure
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using Microsoft.AspNetCore.Mvc.Routing
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@inject ISender Commander
 @rendermode InteractiveServer
 @{
 
 }
 
-<p>This is a Weather Forecast Page</p>
-@if (forecastDtos == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div style="max-height: 400px; overflow: auto;">
-        <InfiniteScroll ObserverTargetId="itemtargetid" ObservableTargetReached="(e) => FetchForecasts()">
-            <ul>
+<LayoutView Layout="typeof(FluentuiLayout)">
+    <PageTitle>Weathers</PageTitle>
+    <HeadContent>
+        <style>
+            main { background: #f0f088; }
+        </style>
+    </HeadContent>
+    <p>This is a Weather Forecast Page</p>
+    @if (forecastDtos == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <InfiniteScroll ObserverContainerId="itemcontainerid"  ObserverTargetId="itemtargetid" ObservableTargetReached="(e) => FetchForecasts()">
+            <ul style="height: 400px; overflow-y: scroll; width: 100%; position:relative " id="itemcontainerid">
                 @foreach (var forecast in forecastDtos)
                 {
                     <li class="list-group-item"> @forecast.Date: @forecast.TemperatureC-@forecast.TemperatureF (@forecast.Summary)</li>
                 }
-                @if(!Stop)
+                @if (!Stop)
                 {
-                    <li class="list-group-item" id="itemtargetid"></li>
+                    <li class="list-group-item" id="itemtargetid" style="background-color:orangered"></li>
                 }
 
             </ul>
 
 
         </InfiniteScroll>
-    </div>
-}
+    }
+</LayoutView>
+
+
 
 
 @code {
@@ -46,6 +61,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+
         //await FetchForecasts();
     }
 
