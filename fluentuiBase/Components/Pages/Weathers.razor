@@ -1,11 +1,5 @@
-﻿@using fluentuiBase.Components.Layout
-@using fluentuiBase.Control
-@using Microsoft.AspNetCore.Mvc
-@using Microsoft.AspNetCore.Mvc.Infrastructure
-@using Microsoft.AspNetCore.Mvc.Rendering
-@using Microsoft.AspNetCore.Mvc.Routing
-@using Microsoft.AspNetCore.Mvc.ViewFeatures
-@inject ISender Commander
+﻿@inject ISender Commander
+
 @rendermode InteractiveServer
 @{
 
@@ -18,7 +12,7 @@
             main { background: #f0f088; }
         </style>
     </HeadContent>
-    <p>This is a Weather Forecast Page</p>
+   
     @if (forecastDtos == null)
     {
         <p><em>Loading...</em></p>
