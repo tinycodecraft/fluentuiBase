@@ -1,0 +1,213 @@
+﻿@inject IHttpClientFactory HttpFactory
+<h3>Album</h3>
+<p>This component demonstrates fetching data from the server.</p>
+
+<button class="btn btn-primary" @onclick="SizeToFitCols">Size-to-Fit Columns</button>
+<button class="btn btn-primary" @onclick="SizeToFitCols500">Size-to-Fit 500 Columns</button>
+<button class="btn btn-primary" @onclick="AutosizeCols">Autosize Columns</button>
+<button class="btn btn-primary" @onclick="RefreshRows">Refresh Rows</button>
+<button class="btn btn-primary" @onclick="PurgeRows">Purge Rows</button>
+
+<div style="margin: 15px 0;">
+    <div class="form-group row">
+        <div class="col">
+            <input @bind="@search" id="search" class="form-control" placeholder="Search..."
+                   @bind:event="oninput" />
+        </div>
+        <div class="col">
+            <button class="btn btn-primary" @onclick="async () => await UpdateSearch()"
+                    disabled="@(search == dataSource.Search)">
+                Search
+            </button>
+            <button class="btn btn-secondary" @onclick="async () => await UpdateSearch(string.Empty)"
+                    disabled="@(string.IsNullOrWhiteSpace(search))">
+                Clear
+            </button>
+        </div>
+    </div>
+</div>
+
+
+@if (photoOp == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <AgGrid @ref="photoGrid" WidthStyle="100%" HeightStyle="300px" Options="photoOp" Events="photoEv"
+            ConfigureScript="fl_album_config">
+        <GridColumn IsResizable="true" IsSortable="true" Header="ID" Field="id" />
+        <GridColumn IsResizable="true" IsSortable="true" Header="Album ID" Field="albumId" />
+        <GridColumn IsResizable="true" IsSortable="true" Header="Title" Field="title" />
+        <GridColumn IsResizable="true" IsSortable="true" Header="URL" Field="url" />
+        <GridColumn IsResizable="true" IsSortable="true" Header="Thumbnail URL" Field="thumbnailUrl" />
+    </AgGrid>
+}
+
+@code {
+
+    private AgGrid photoGrid;
+    private PhotosDataSource dataSource;
+    private GridOptions photoOp;
+    private GridEvents photoEv;
+    private string search = string.Empty;
+
+    class Photo
+    {
+        // Sample:
+        //"albumId": 1,
+        //"id": 1,
+        //"title": "accusamus beatae ad facilis cum similique qui sunt",
+        //"url": "https://via.placeholder.com/600/92c952",
+        //"thumbnailUrl": "https://via.placeholder.com/150/92c952"
+
+        public int Id { get; set; }
+        public int AlbumId { get; set; }
+        public string Title { get; set; }
+        public string Url { get; set; }
+        public string ThumbnailUrl { get; set; }
+    }
+
+    
+    class PhotosDataSource : IGridDatasource
+    {
+        public IHttpClientFactory HttpFactory { get; set; }
+        public string Search { get; set; } = string.Empty;
+
+
+        public async Task GetRows(IGetRowsParams getParams)
+        {
+            try
+            {
+                var url = "https://jsonplaceholder.typicode.com/photos";
+
+                // https://github.com/typicode/json-server#slice
+                url += $"?_start={getParams.StartRow}";
+                url += $"&_end={getParams.EndRow}";
+
+                if (getParams.SortModel?.Length > 0)
+                {
+                    // https://github.com/typicode/json-server#sort
+                    url += $"&_sort={string.Join(",", getParams.SortModel.Select(sm => sm.ColumnId))}";
+                    url += $"&_order={string.Join(",", getParams.SortModel.Select(sm => sm.Direction))}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(Search))
+                {
+                    url += $"&q={Uri.EscapeUriString(Search)}";
+                }
+
+                using var Http = HttpFactory.CreateClient();
+
+                Console.WriteLine("Fetching from [{0}]", url);
+                var resp = await Http.GetAsync(url);
+                resp.EnsureSuccessStatusCode();
+
+                // https://github.com/typicode/json-server#slice
+                resp.Headers.TryGetValues("X-Total-Count", out var totalCountHeader);
+                var totalCount = int.TryParse(totalCountHeader?.FirstOrDefault(), out var totalCountInt)
+                    ? (int?)totalCountInt
+                    : null;
+
+                var photos = await Http.GetJsonAsync<Photo[]>(url);
+                Console.WriteLine("From [{0}:{1}], got [{2}] row(s) out of [{3}]",
+                    getParams.StartRow, getParams.EndRow, photos.Length, totalCount);
+
+                await getParams.SuccessCallback(photos, totalCount);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to retrieve!");
+                Console.WriteLine(ex.ToString());
+                await getParams.FailCallback();
+            }
+        }
+
+        public Task Destroy()
+        {
+            // Nothing to do
+            return Task.CompletedTask;
+        }
+    }
+
+    // In Blazor Server-side hosting model ag-Grid Callbacks CANNOT be used
+    // because they have to execute synchronously and only asynchronous
+    // invocation across JS/.NET runtimes is supported in Blazor Server-side
+    //private GridCallbacks photoCb;
+
+    protected override void OnInitialized()
+    {
+        dataSource = new PhotosDataSource { HttpFactory = HttpFactory };
+        photoOp = new GridOptions
+            {
+                Datasource = dataSource,
+                EnablePagination = true,
+                EnableRowDeselection = true,
+                RowModelType = RowModelType.Infinite,
+                RowSelection = RowSelection.Single,
+                SuppressCellSelection = true,
+            };
+        //photoCb = new GridCallbacks
+        //{
+        //    GetRowNodeId = node =>
+        //    {
+        //        var id = node.GetProperty("id").ToString();
+        //        Console.WriteLine($"Got node: [{id}]");
+        //        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(node));
+        //        return $"ID#{id}";
+        //    },
+        //};
+        photoEv = new GridEvents
+            {
+                SelectionChanged = (Action<RowNode[]>)(nodes =>
+                {
+                    Console.WriteLine("SELECTION HAS CHANGED! " + nodes.Length);
+                }),
+            };
+    }
+
+
+
+    private async Task SizeToFitCols()
+    {
+        await photoGrid.Api.SizeColumnsToFit();
+    }
+
+    private async Task SizeToFitCols500()
+    {
+        await photoGrid.ColumnApi.SizeColumnsToFit(500);
+    }
+
+    private async Task AutosizeCols()
+    {
+        var colKeys = new[]
+        {
+            "id",
+            "albumId",
+            "title",
+            "url",
+            "thumbnailUrl",
+        };
+        await photoGrid.ColumnApi.AutoSizeColumns(colKeys);
+    }
+
+    private async Task RefreshRows()
+    {
+        await photoGrid.Api.RefreshInfiniteCache();
+    }
+
+    private async Task PurgeRows()
+    {
+        await photoGrid.Api.PurgeInfiniteCache();
+    }
+
+    private async Task UpdateSearch(string newSearch = null)
+    {
+        if (newSearch != null)
+            search = newSearch;
+        dataSource.Search = search;
+        await photoGrid.Api.PurgeInfiniteCache();
+    }
+
+
+}

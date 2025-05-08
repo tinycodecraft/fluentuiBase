@@ -57,7 +57,10 @@ public class HomeController : Controller
         return View(result.Value);
     }
 
-
+    public IActionResult Album(int total = 100)
+    {
+        return View();
+    }
     public IActionResult Weather(int total =100)
     {
 

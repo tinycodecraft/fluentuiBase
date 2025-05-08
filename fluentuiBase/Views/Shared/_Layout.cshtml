@@ -6,20 +6,25 @@
     <component type="typeof(Microsoft.AspNetCore.Components.Web.HeadOutlet)" render-mode="ServerPrerendered" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - fluentuiBase</title>    
+    <title>@ViewData["Title"] - fluentuiBase</title>  
+    <link rel="stylesheet" href="~/lib/aggrid/ag-grid.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/aggrid/ag-grid-balham.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/fluentuiBase.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
     @RenderBody()
 
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>    
-    <script src="~/js/site.js" asp-append-version="true"></script>  
+    <script src="~/js/album.agoptions.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>   
+    <script src="~/lib/aggrid/ag-grid-com.min.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>      
     <script src="_content/Microsoft.FluentUI.AspNetCore.Components/Microsoft.FluentUI.AspNetCore.Components.lib.module.js" type="module" async></script>
     <script src="_content/fluentuiBase.Control/js/exampleJsInterop.js"></script>
     <script src="_content/fluentuiBase.Control/js/observer.js"></script>
+    <script src="_content/fluentuiBase.Control/js/blazor-ag-grid.js"></script>
     <script src="_framework/blazor.web.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
