@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 public partial class GridOptions
 {
     private IGridDatasource _Dataource;
-
+    
     [JsonIgnore]
     public IGridDatasource Datasource
     {

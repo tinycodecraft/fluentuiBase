@@ -107,6 +107,7 @@ public enum EditType
 
 internal class EnumConverter : JsonConverterFactory
 {
+    //Try to convert the value of Enum as String Value in Enum Declaration instead of Integer Value
     private JsonConverterFactory _inner = new JsonStringEnumConverter(
         JsonNamingPolicy.CamelCase, false);
 
