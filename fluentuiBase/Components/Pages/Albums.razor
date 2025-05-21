@@ -153,6 +153,10 @@
         dataSource = new PhotosDataSource { HttpFactory = HttpFactory };
         photoOp = new GridOptions
             {
+                //when Datasource is assigned, implicitly set event for preparing interop
+                //Please see GridOptions definition file .DataSource.cs
+                //In which the interop is dotref used for being invoked from JS's counterpart native DS
+                //please wrapper JS blazor-ag-grid.js line 10 and line 159 (create real DS counterpart )
                 Datasource = dataSource,
                 EnablePagination = false,
                 EnableRowDeselection = true,
