@@ -25,7 +25,7 @@ window.blazor_ag_grid = {
             console.log("DS Ref: " + blazor_ag_grid.util_stringify(ds));
             blazor_ag_grid.createGrid_wrapDatasource(op, ds);
         }
-
+        console.log("Got columnDefs: " + blazor_ag_grid.util_stringify(op.columnDefs));
         if (configScript) {
             if (window[configScript]) {
                 window[configScript].call(null, op);
