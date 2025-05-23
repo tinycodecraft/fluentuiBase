@@ -56,9 +56,17 @@ public partial class GridOptions
             _inner = inner;
         }
 
+        //normally, we can get result from JS side by await in blazor side
+        //however, the JS side will not be able to await the result from blazor side
+        //if JS side wants to get result in synchronous way from blazor side, and blazor side function only execute in async way, JS side will not be able to get the result
+
         [JSInvokable]
         public Task GetRows(InteropGetRowsParams getParams)
         {
+            //Please note that params from JS, having the callback function to notify the result ready
+            //however, the blazor side will not be able to call the callback function directly
+            //JS side will save the callback function in global ag-grid helper dictionary with generated callbackid in the params
+            //blazor side will call its own proxy callback to invoke the actual JS side callback function by passing the callbackid and result through global ag-grid helper JS function
             var proxy = new GetRowsParamsProxy(_js, getParams);
             return _inner.GetRows(proxy);
         }

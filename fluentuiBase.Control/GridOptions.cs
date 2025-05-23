@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 /// </summary>
 public partial class GridOptions
 {
+    public ColorScheme? RowColorScheme { get; set; }
     public RowModelType? RowModelType { get; set; }
 
     // Pagination
@@ -84,6 +85,22 @@ public partial class GridOptions
     ///   https://www.ag-grid.com/javascript-grid-tree-data/
     public bool? TreeData { get; set; }
 }
+[JsonConverter(typeof(EnumConverter))]
+public enum ColorScheme
+{
+    DesignSubmission=0,
+    BarrierDamage=1
+}
+[JsonConverter(typeof(EnumConverter))]
+public enum RowColorType
+{
+    None=0,
+    Warning=1,
+    Danger =2,
+    Alert =3
+
+}
+
 
 [JsonConverter(typeof(EnumConverter))]
 public enum RowModelType
