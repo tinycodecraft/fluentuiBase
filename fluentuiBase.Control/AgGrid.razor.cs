@@ -45,6 +45,10 @@ namespace fluentuiBase.Control
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+            //if (firstRender)
+            //{
+            //    //await JS.InvokeVoidAsync("eval", $"window.blazorProperties = {{ myProperty: '{MyProperty}' }};");
+            //}
             if (!_isRendered)
             {
                 _isRendered = true;
