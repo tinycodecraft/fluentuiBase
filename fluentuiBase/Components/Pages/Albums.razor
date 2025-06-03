@@ -46,9 +46,9 @@
     {
         <AgGrid @ref="photoGrid" WidthStyle="100%" HeightStyle="300px" Options="photoOp" Events="photoEv"
                 ConfigureScript="fl_album_config">
-            <GridColumn IsResizable="true" IsSortable="true" Header="ID" Field="id" />
-            <GridColumn IsResizable="true" IsSortable="true" Header="Album ID" Field="albumId" />
-            <GridColumn IsResizable="true" IsSortable="true" Header="Title" Field="title" />
+            <GridColumn IsResizable="true" IsSortable="true" Header="ID" Field="id"  />
+            <GridColumn IsResizable="true" IsSortable="true" Header="Album ID" Field="albumId"  />
+            <GridColumn IsResizable="true" IsSortable="true" Header="Title" Field="title" Filter="string" />
             <GridColumn IsResizable="true" IsSortable="true" Header="URL" Field="url" />
             <GridColumn IsResizable="true" IsSortable="true" Header="Thumbnail URL" Field="thumbnailUrl" />
         </AgGrid>

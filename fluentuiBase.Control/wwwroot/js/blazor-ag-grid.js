@@ -26,6 +26,34 @@ window.blazor_ag_grid = {
             blazor_ag_grid.createGrid_wrapDatasource(op, ds);
         }
         console.log("Got columnDefs: " + blazor_ag_grid.util_stringify(op.columnDefs));
+        if (op.columnDefs && op.columnDefs.length > 0) {
+            op.columnDefs.forEach(function (colDef, i) {
+                if (colDef.floatingFilter) {
+                    colDef["suppressMenu"] = true;
+                    colDef["floatingFilterComponentParams"] = { suppressFilterButton: true };
+                    colDef["filterParams"] = {
+                        filterOptions: ["contains"].concat(colDef.choices),
+                        suppressAndOrCondition: true,
+
+                        textMatcher: function (textparams) {
+                            console.log(textparams);
+
+                            if (textparams.filter !== "contains") {
+                                return value == textparams.filter;
+                            }
+
+                            let rg = new RegExp(textparams.filterText, "gi");
+                            if (rg.test(value)) return true;
+
+                            return false;
+                        },
+                    };
+                }
+
+            });
+
+        }
+
         if (configScript) {
             if (window[configScript]) {
                 window[configScript].call(null, op);

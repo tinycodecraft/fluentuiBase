@@ -16,8 +16,24 @@ namespace fluentuiBase.Control
         [Parameter] public string Header { get; set; }
         [Parameter] public bool IsResizable { get; set; }
         [Parameter] public bool IsSortable { get; set; }
-        [Parameter] public bool IsFiltered { get; set; }
+        
         [Parameter] public bool IsEditable { get; set; }
+
+        [Parameter] public string Filter { get; set; }
+
+        [Parameter] public bool HideFilter { get; set; }
+
+        [Parameter] public bool ToSuppress { get; set; }
+
+        [Parameter] public string Choices { get; set; }
+
+        private object getFilter(string filtertype) => filtertype switch
+        {
+            "string" => "agTextColumnFilter",
+            "number" => "agNumberColumnFilter",
+            _ => false
+        };
+        static string[] validfilters =new [] { "string", "number" };
 
         protected override void OnInitialized()
         {
@@ -27,8 +43,12 @@ namespace fluentuiBase.Control
                 HeaderName = Header,
                 IsResizable = IsResizable,
                 IsSortable = IsSortable,
-                IsFiltered = IsFiltered,
+                Filter = getFilter(Filter),
                 IsEditable = IsEditable,
+                HasFloatingFilter = !HideFilter && validfilters.Contains(Filter),
+                NoToolPanel = ToSuppress,
+                Suppress = ToSuppress,
+                Choices = Choices == null ? new string[] { }: Choices.Split('|').Select(c => c.Trim()).ToArray()
             }); ;
         }
     }

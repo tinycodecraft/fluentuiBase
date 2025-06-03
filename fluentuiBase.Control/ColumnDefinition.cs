@@ -23,8 +23,17 @@ public partial class ColumnDefinition
     public bool IsSortable { get; set; }
 
     [JsonPropertyName("filter")]
-    public bool IsFiltered { get; set; }
+    public object Filter { get; set; }
 
     [JsonPropertyName("editable")]
     public bool IsEditable { get; set; }
+
+    [JsonPropertyName("floatingFilter")]
+    public bool HasFloatingFilter { get; set; }
+    [JsonPropertyName("hide")]
+    public bool Suppress { get; set; }
+    [JsonPropertyName("suppressToolPanel")]
+    public bool NoToolPanel { get; set; }
+    [JsonPropertyName("choices")]
+    public string[] Choices { get; set; }
 }

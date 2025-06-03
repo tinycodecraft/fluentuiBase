@@ -62,7 +62,13 @@ namespace fluentuiBase.Control
         {
             if (Options == null)
                 Options = new GridOptions();
-
+            // the definitions reference is cascaded down to each GridColumn component
+            // GridColumn init and add definition in that reference
+            // AgGrid to be rendered
+            // set the populated definitions to internal one
+            // trigger prepare definition event in options
+            // options fire the events such that columnDefs are ready
+            // invoke javascript side to create the grid
             if (_columnDefinitions?.Count > 0)
                 Options.InternalColumnDefinitions = _columnDefinitions;
 
