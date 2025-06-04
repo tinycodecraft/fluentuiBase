@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace fluentuiBase.Store.Commands;
 
 
-public record GetAutoCompleteQuery(CN.AutoSuggestType returntype,string userid):IRequest<ErrorOr<KeyValuePair<string,string>[]>>;
+public record GetAutoCompleteQuery(CN.AutoSuggestType returntype,string userid,string? search=null):IRequest<ErrorOr<KeyValuePair<string,string>[]>>;
 public class GetAutoCompleteQueryHandler : IRequestHandler<GetAutoCompleteQuery, ErrorOr<KeyValuePair<string, string>[]>>
 {
     public readonly IBlazeLogDbContext context;
@@ -27,11 +27,13 @@ public class GetAutoCompleteQueryHandler : IRequestHandler<GetAutoCompleteQuery,
 
     public async Task<ErrorOr<KeyValuePair<string, string>[]>> Handle(GetAutoCompleteQuery request, CancellationToken cancellationToken)
     {
-        switch(request.returntype)
+        var needSearch = !string.IsNullOrEmpty(request.search);
+        var searchvalue = request.search ?? "";
+        switch (request.returntype)
         {
             case CN.AutoSuggestType.Engineers:
                 var engineers = await context.CoreUsers
-                    .Where(e => !e.Disabled)
+                    .Where(e => !e.Disabled && (!needSearch ||  e.Post.Contains(searchvalue) ))
                     .Select(e => e.Post)
                     .ToArrayAsync(cancellationToken);
                 return engineers.Select(y=> new KeyValuePair<string, string>(y,y)).ToArray();

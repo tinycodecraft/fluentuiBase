@@ -13,8 +13,104 @@ window.blazor_ag_grid = {
             }, timecnt);
         }
     },
-    setupAutoComplte: function (selector, urltag, withintag, selecthandler, clearhandler, toupper) {
+    setupAutoComplete: function (selector, urltag, withintag, selecthandler, clearhandler, toupper) {
+        var withinHtml = $(document);
+        if (withintag) {
+            withinHtml = $(withintag);
+        }
 
+        $(selector, withinHtml).each(function (i, e) {
+            var apiGet = $(e).attr(urltag);
+            var $el = $(e);
+            var detecthandler = selecthandler;
+            var canwrap = !!clearhandler;
+
+            $(e)
+                .autoComplete({
+                    minChars: 0,
+                    cache: false,
+                    upper: !!toupper,
+                    source: function (searchValue, response) {
+                        searchValue = $.trim(searchValue);
+                        var params = { wanted: searchValue };
+                        var prop = $el.attr("propname");
+                        var exclude = $el.attr("exclude");
+                        if (prop) {
+                            params["propname"] = prop;
+                            if (exclude) {
+                                params["exclude"] = exclude;
+                            }
+                        }
+
+                        var ajaxSubmit = $.ajaxQueue({
+                            type: "GET",
+                            url: apiGet,
+                            data: params,
+                        });
+                        ajaxSubmit.jload().done(function (data) {
+                            response(data);
+                        });
+                    },
+                    onSelect: function (el, search, item) {
+                        if (item) {
+                            $el.val(item.data("lang"));
+                            if (detecthandler) {
+                                if (item.data("key")) {
+                                    detecthandler($el, item.data("lang"), item.data("key"));
+                                } else {
+                                    detecthandler($el, item.data("lang"));
+                                }
+                            }
+                        }
+                    },
+                    renderItem: function (item, search) {
+                        var rg = /[-/\\^$*+?.()|[\]{}]/g;
+                        var fkrg = new RegExp("{", "gi");
+                        var bkrg = new RegExp("}", "gi");
+                        search = search.replace(rg, "\\$&");
+
+                        if (!item || !apiGet) {
+                            return $("<div></div>").html();
+                        }
+                        if (apiGet) {
+                            var re = new RegExp("(" + search.split(" ").join("|") + ")", "gi");
+                            var canwrapclass = !!canwrap ? " wrapitem " : "";
+                            var $renditem = $(
+                                '<div class="autocomplete-suggestion ' +
+                                canwrapclass +
+                                '" data-lang="' +
+                                item.Value +
+                                '" data-val="' +
+                                search +
+                                '" data-key="' +
+                                item.Key +
+                                '"> ' +
+                                htmlEncode(item.Value.replace(re, "{$1}")).replace(fkrg, "<b>").replace(bkrg, "</b>") +
+                                "</div>"
+                            );
+
+                            return $renditem.wrap("div").parent().html();
+                        }
+                    },
+                })
+                .bind("click", function () {
+                    $(this).trigger("focus");
+                })
+                .bind("focus", function () {
+                    if (canwrap) {
+                        clearhandler($(this));
+                    }
+
+                    if (!$(this).val()) {
+                        $(this).keydown();
+                    }
+                })
+                .bind("blur", function () {
+                    if (canwrap) {
+                        clearhandler($(this), true);
+                    }
+                });
+        });
     },
     callbackMap: {}
     , renderCount: 0
