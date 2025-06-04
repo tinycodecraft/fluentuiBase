@@ -229,10 +229,13 @@ app.MapGet("/api/hello", () =>
     return Results.Ok("Hello World");
 });
 
-app.MapGroup("/api/" + nameof(AutocompleteGroup.weathers))    
-    .MapApiFor(AutocompleteGroup.weathers)
-    .WithTags(nameof(AutocompleteGroup.weathers));
+app.MapGroup("/api/" + nameof(CN.AutocompleteGroup.weathers))    
+    .MapApiFor(CN.AutocompleteGroup.weathers)
+    .WithTags(nameof(CN.AutocompleteGroup.weathers));
 
+app.MapGroup("/api/" + nameof(CN.AutocompleteGroup.suggests))
+    .MapApiFor(CN.AutocompleteGroup.suggests)
+    .WithTags(nameof(CN.AutocompleteGroup.suggests));
 
 //test successful
 //app.MapGet("/api/throw", () => { throw new Exception("This is a test exception"); return Results.Ok("Not Ok"); });

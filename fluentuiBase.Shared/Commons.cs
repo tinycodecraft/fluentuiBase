@@ -74,6 +74,18 @@ namespace fluentuiBase.Shared
 
     public class Constants
     {
+        public enum AutoSuggestType
+        {
+            Engineers,
+            Posts,
+            Emails,
+        }
+        public enum AutocompleteGroup
+        {
+            suggests,
+            weathers,
+
+        }
         public enum PathType
         {
             Share,

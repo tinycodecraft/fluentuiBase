@@ -1,0 +1,44 @@
+﻿using AutoMapper;
+using fluentuiBase.Store.Setup;
+using fluentuiBase.Store.Dtos;
+using MediatR;
+using fluentuiBase.Shared.ErrorOr;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+
+namespace fluentuiBase.Store.Commands;
+
+
+public record GetAutoCompleteQuery(CN.AutoSuggestType returntype,string userid):IRequest<ErrorOr<KeyValuePair<string,string>[]>>;
+public class GetAutoCompleteQueryHandler : IRequestHandler<GetAutoCompleteQuery, ErrorOr<KeyValuePair<string, string>[]>>
+{
+    public readonly IBlazeLogDbContext context;
+    public readonly IMapper mapper;
+    public GetAutoCompleteQueryHandler(IBlazeLogDbContext ctx, IMapper mp)
+    {
+        context = ctx;
+        mapper = mp;
+    }
+
+    public async Task<ErrorOr<KeyValuePair<string, string>[]>> Handle(GetAutoCompleteQuery request, CancellationToken cancellationToken)
+    {
+        switch(request.returntype)
+        {
+            case CN.AutoSuggestType.Engineers:
+                var engineers = await context.CoreUsers
+                    .Where(e => !e.Disabled)
+                    .Select(e => e.Post)
+                    .ToArrayAsync(cancellationToken);
+                return engineers.Select(y=> new KeyValuePair<string, string>(y,y)).ToArray();
+
+            default:
+                return Error.NotFound("AutoCompleteNotFound", $"AutoComplete not found for type {request.returntype}");
+        }
+
+    }
+}

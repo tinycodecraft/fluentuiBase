@@ -8,19 +8,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace fluentuiBase.Middlewares;
 
-public enum AutocompleteGroup
-{
-    weathers,
 
-}
 
 public static class Autocompletes
 {
-    public static RouteGroupBuilder MapApiFor(this RouteGroupBuilder builder,AutocompleteGroup group)
+    public static RouteGroupBuilder MapApiFor(this RouteGroupBuilder builder,CN.AutocompleteGroup group)
     {
         switch(group)
         {
-            case AutocompleteGroup.weathers:
+            case CN.AutocompleteGroup.suggests:
+                builder.MapGet("/{userid}", GetAllSuggestions).Produces(200, typeof(KeyValuePair<string, string>[]));
+                break;
+
+            case CN.AutocompleteGroup.weathers:
                 builder.MapGet("/all/{userid}", GetAllWeathers).Produces(200, typeof(List<WeatherForecastDto>));
 
                 break;
@@ -29,6 +29,20 @@ public static class Autocompletes
         }
 
         return builder;
+    }
+
+    internal static async Task<IResult> GetAllSuggestions(IMediator commander,ILogger<Program> logger, string userid, [FromQuery(Name = "wanted")]string wanted)
+    {
+        var wantedtype = Ss.GetEnum<CN.AutoSuggestType>(wanted);
+        var result = await commander.Send(new GetAutoCompleteQuery(wantedtype, userid));
+
+        if(result.IsError)
+        {
+            logger.LogDebug(result.FirstError.Description);
+            return TypedResults.Ok(new KeyValuePair<string, string>[] { });
+        }
+
+        return TypedResults.Ok(result.Value);
     }
 
     internal static async Task<IResult> GetAllWeathers(IMediator commander,ILogger<Program> logger,string userid, [FromQuery(Name = "start")]int? start = 1, [FromQuery(Name ="size")]int? size= 10, [FromQuery(Name = "total")]int? total=100)
