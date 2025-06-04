@@ -1,4 +1,21 @@
-window.blazor_ag_grid = {   
+window.blazor_ag_grid = {  
+    spaceKeyDispatch: function (el, timecnt) {
+        if (el && el.length) {
+            setTimeout(() => {
+                el[0].dispatchEvent(
+                    new KeyboardEvent("keydown", {
+                        key: " ",
+                        code: "Space",
+                        keyCode: 32,
+                        which: 32,
+                    })
+                );
+            }, timecnt);
+        }
+    },
+    setupAutoComplte: function (selector, urltag, withintag, selecthandler, clearhandler, toupper) {
+
+    },
     callbackMap: {}
     , renderCount: 0
     , createGrid: function (gridDiv, interopOptions, configScript) {
