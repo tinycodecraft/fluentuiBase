@@ -141,6 +141,7 @@ namespace fluentuiBase.Shared
             public static int PageStart = 1;
             public static string AppName = typeof(Setting).Assembly.GetName().Name!.Replace(".Shared", "");
             public static string AuthorizeCookieKey = $"HYD.AuthorizeCookie_Key";
+            public static string UserIDSessionKey = $"HYD.UserSessionKey";
             public const string SEARCH_SEPARATOR = "$";
             public const string SecretKey = "HYD.abcqwe123";
             public const string Issuer = "HYD";

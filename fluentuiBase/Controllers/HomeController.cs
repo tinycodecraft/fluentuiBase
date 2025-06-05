@@ -22,8 +22,9 @@ public class HomeController : Controller
     private readonly IStringLocalizer _stringLocalizer;
     private readonly IN.ITokenService tokener;
     private readonly IMapper mapper;
+    private readonly ISession session;
 
-    public HomeController(ILogger<HomeController> logger,IStringLocalizerFactory stringFactory,IMediator mediator,IN.ITokenService tokenHelper,IMapper itmapper )
+    public HomeController(ILogger<HomeController> logger,IStringLocalizerFactory stringFactory,IMediator mediator,IN.ITokenService tokenHelper,IMapper itmapper,IHttpContextAccessor accessor )
     {
         _logger = logger;
         //using Factory instead of Dummy type fluentuiBase.SharedResource as generic type of IStringLocalizer<>
@@ -31,6 +32,7 @@ public class HomeController : Controller
         commander = mediator;
         tokener = tokenHelper;
         mapper = itmapper;
+        session = accessor.HttpContext!.Session;
     }
 
     public async Task<IActionResult> Index(GetUsersQuery query)

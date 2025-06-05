@@ -133,7 +133,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             {
                 var tokenService = context.HttpContext.RequestServices.GetRequiredService<IN.ITokenService>();
                 ISender commander = context.HttpContext.RequestServices.GetRequiredService<IMediator>();
-
+                
+                
+                
                 if (context.Principal != null)
                 {
                     var user = tokenService.DecodeTokenToUser(context.Principal.Claims.First(x => x.Type == "token").Value);
@@ -148,6 +150,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
                         if (result.IsError)
                         {
+                            
                             context.RejectPrincipal();
                             await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                         }
@@ -270,6 +273,7 @@ app.UseRouting();
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
