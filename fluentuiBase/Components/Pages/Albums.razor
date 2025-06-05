@@ -1,11 +1,12 @@
 ﻿@inject IHttpClientFactory HttpFactory
+@inject NavigationManager NavMgr
 @rendermode InteractiveServer
 <LayoutView Layout="typeof(FluentuiLayout)">
     <PageTitle>Albums</PageTitle>
     <HeadContent>
         <style>
             main {
-                background: #f0f088;
+            background: #f0f088;
             }
         </style>
     </HeadContent>
@@ -22,15 +23,15 @@
         <div class="form-group row">
             <div class="col">
                 <input @bind="@search" id="search" class="form-control" placeholder="Search..."
-                       @bind:event="oninput" />
+                @bind:event="oninput" />
             </div>
             <div class="col">
                 <button class="btn btn-primary" @onclick="async () => await UpdateSearch()"
-                        disabled="@(search == dataSource.Search)">
+                disabled="@(search == dataSource.Search)">
                     Search
                 </button>
                 <button class="btn btn-secondary" @onclick="async () => await UpdateSearch(string.Empty)"
-                        disabled="@(string.IsNullOrWhiteSpace(search))">
+                disabled="@(string.IsNullOrWhiteSpace(search))">
                     Clear
                 </button>
             </div>
@@ -45,10 +46,10 @@
     else
     {
         <AgGrid @ref="photoGrid" WidthStyle="100%" HeightStyle="300px" Options="photoOp" Events="photoEv"
-                ConfigureScript="fl_album_config">
+        ConfigureScript="fl_album_config">
             <GridColumn IsResizable="true" IsSortable="true" Header="ID" Field="id"  />
             <GridColumn IsResizable="true" IsSortable="true" Header="Album ID" Field="albumId"  />
-            <GridColumn IsResizable="true" IsSortable="true" Header="Title" Field="title" Filter="string" />
+            <GridColumn IsResizable="true" IsSortable="true" Header="Title" Field="title" Filter="string" Wanted="@(nameof(CN.AutoSuggestType.Engineers))" Urlis="@(NavMgr.BaseUri + "api/suggests/ray")" />
             <GridColumn IsResizable="true" IsSortable="true" Header="URL" Field="url" />
             <GridColumn IsResizable="true" IsSortable="true" Header="Thumbnail URL" Field="thumbnailUrl" />
         </AgGrid>
@@ -81,7 +82,7 @@
         public string ThumbnailUrl { get; set; }
     }
 
-    
+
     class PhotosDataSource : IGridDatasource
     {
         public IHttpClientFactory HttpFactory { get; set; }
@@ -151,6 +152,8 @@
     protected override void OnInitialized()
     {
         dataSource = new PhotosDataSource { HttpFactory = HttpFactory };
+        var uri = NavMgr.BaseUri+ "/api/suggests/ray";
+        
         photoOp = new GridOptions
             {
                 //when Datasource is assigned, implicitly set event for preparing interop
@@ -164,6 +167,7 @@
                 RowSelection = RowSelection.Single,
                 RowColorScheme= ColorScheme.DesignSubmission,
                 SuppressCellSelection = true,
+                Urlis = uri,
             };
         //photoCb = new GridCallbacks
         //{

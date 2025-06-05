@@ -1,4 +1,14 @@
 window.blazor_ag_grid = {  
+
+    htmlEncode: function (value) {
+        //create a in-memory div, set it's inner text(which jQuery automatically encodes)
+        //then grab the encoded contents back out. The div never exists on the page.
+        return $("<div/>").text(value).html();
+    },
+
+    htmlDecode: function (value) {
+        return $("<div/>").html(value).text();
+    },
     spaceKeyDispatch: function (el, timecnt) {
         if (el && el.length) {
             setTimeout(() => {
@@ -32,24 +42,25 @@ window.blazor_ag_grid = {
                     upper: !!toupper,
                     source: function (searchValue, response) {
                         searchValue = $.trim(searchValue);
-                        var params = { wanted: searchValue };
+                        var params = { search: searchValue };
                         var prop = $el.attr("propname");
                         var exclude = $el.attr("exclude");
                         if (prop) {
-                            params["propname"] = prop;
+                            params["wanted"] = prop;
                             if (exclude) {
                                 params["exclude"] = exclude;
                             }
                         }
 
-                        var ajaxSubmit = $.ajaxQueue({
+                        $.ajax({
                             type: "GET",
                             url: apiGet,
                             data: params,
+                            success: function (data) {
+                                response(data);
+                            }
                         });
-                        ajaxSubmit.jload().done(function (data) {
-                            response(data);
-                        });
+
                     },
                     onSelect: function (el, search, item) {
                         if (item) {
@@ -72,24 +83,34 @@ window.blazor_ag_grid = {
                         if (!item || !apiGet) {
                             return $("<div></div>").html();
                         }
+                        if (!item.value) {
+                            item.value = '';
+
+                        }
                         if (apiGet) {
                             var re = new RegExp("(" + search.split(" ").join("|") + ")", "gi");
                             var canwrapclass = !!canwrap ? " wrapitem " : "";
+                            var encodedvalue = blazor_ag_grid.htmlEncode(item.value.replace(re, "{$1}").replace(/\{\}/g, ""));
                             var $renditem = $(
                                 '<div class="autocomplete-suggestion ' +
                                 canwrapclass +
                                 '" data-lang="' +
-                                item.Value +
+                                item.value +
                                 '" data-val="' +
                                 search +
                                 '" data-key="' +
-                                item.Key +
+                                item.key +
                                 '"> ' +
-                                htmlEncode(item.Value.replace(re, "{$1}")).replace(fkrg, "<b>").replace(bkrg, "</b>") +
+                                encodedvalue.replace(fkrg, "<b>").replace(bkrg, "</b>") +
                                 "</div>"
                             );
-
-                            return $renditem.wrap("div").parent().html();
+                            var fragment = $renditem && $renditem.length && $renditem[0].outerHTML;
+                            
+                            console.log(fragment)
+                            if (!fragment) {
+                                fragment = $("<div></div>")[0].outerHTML;
+                            }
+                            return fragment;
                         }
                     },
                 })
@@ -142,6 +163,7 @@ window.blazor_ag_grid = {
         if (op.columnDefs && op.columnDefs.length > 0) {
             op.columnDefs.forEach(function (colDef, i) {
                 if (colDef.floatingFilter) {
+                    
                     colDef["suppressMenu"] = true;
                     colDef["floatingFilterComponentParams"] = { suppressFilterButton: true };
                     colDef["filterParams"] = {
@@ -169,7 +191,7 @@ window.blazor_ag_grid = {
 
         if (configScript) {
             if (window[configScript]) {
-                window[configScript].call(null, op);
+                window[configScript].call(null, op,blazor_ag_grid.setupAutoComplete,blazor_ag_grid.spaceKeyDispatch);
             }
             else {
                 console.error("gridOptions local configScript was specified but could not be resolved; ABORTING");

@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 /// </summary>
 public partial class GridOptions
 {
+    public string Urlis { get; set; }
     public ColorScheme? RowColorScheme { get; set; }
     public RowModelType? RowModelType { get; set; }
 

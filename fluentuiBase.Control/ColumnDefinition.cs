@@ -36,4 +36,8 @@ public partial class ColumnDefinition
     public bool NoToolPanel { get; set; }
     [JsonPropertyName("choices")]
     public string[] Choices { get; set; }
+    [JsonPropertyName("urlis")]
+    public string Urlis { get; set; }
+    [JsonPropertyName("wanted")]
+    public string Wanted { get; set; }
 }

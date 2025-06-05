@@ -27,6 +27,9 @@ namespace fluentuiBase.Control
 
         [Parameter] public string Choices { get; set; }
 
+        [Parameter] public string Urlis { get; set; }
+        [Parameter] public string Wanted { get; set; }
+
         private object getFilter(string filtertype) => filtertype switch
         {
             "string" => "agTextColumnFilter",
@@ -48,7 +51,9 @@ namespace fluentuiBase.Control
                 HasFloatingFilter = !HideFilter && validfilters.Contains(Filter),
                 NoToolPanel = ToSuppress,
                 Suppress = ToSuppress,
-                Choices = Choices == null ? new string[] { }: Choices.Split('|').Select(c => c.Trim()).ToArray()
+                Choices = Choices == null ? new string[] { }: Choices.Split('|').Select(c => c.Trim()).ToArray(),
+                Wanted = Wanted,
+                Urlis = Urlis
             }); ;
         }
     }

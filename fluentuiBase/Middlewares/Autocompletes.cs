@@ -17,7 +17,7 @@ public static class Autocompletes
         switch(group)
         {
             case CN.AutocompleteGroup.suggests:
-                builder.MapGet("/{userid}/{search?}", GetAllSuggestions).Produces(200, typeof(KeyValuePair<string, string>[]));
+                builder.MapGet("/{userid}", GetAllSuggestions).Produces(200, typeof(KeyValuePair<string, string>[]));
                 break;
 
             case CN.AutocompleteGroup.weathers:
@@ -31,7 +31,7 @@ public static class Autocompletes
         return builder;
     }
 
-    internal static async Task<IResult> GetAllSuggestions(IMediator commander,ILogger<Program> logger, string userid, [FromQuery(Name = "wanted")]string wanted, string? search = null)
+    internal static async Task<IResult> GetAllSuggestions(IMediator commander,ILogger<Program> logger, string userid, [FromQuery(Name = "wanted")]string wanted,[FromQuery] string? search = null)
     {
         var wantedtype = Ss.GetEnum<CN.AutoSuggestType>(wanted);
         var result = await commander.Send(new GetAutoCompleteQuery(wantedtype, userid,search));
