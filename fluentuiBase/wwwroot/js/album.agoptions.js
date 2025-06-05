@@ -85,7 +85,7 @@ window.fl_album_config = function (gridOptions, autoCompletefn,keyDispatch) {
                     $clearUI.on("click", function () {
                         vl.val("");
                         $clearUI.addClass("hidden");
-                        spaceKeyDispatch(vl.parent().parent(), 100);
+                        keyDispatch(vl.parent().parent(), 100);
                     });
                 } else {
                     var $clearUI = $(clearClselector, vl.parent());
