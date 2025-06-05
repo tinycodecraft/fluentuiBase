@@ -94,6 +94,31 @@
             try
             {
                 var url = "https://jsonplaceholder.typicode.com/photos";
+                Dictionary<string, string> queryParams = new Dictionary<string, string>();
+
+                if(getParams.FilterModel!=null)
+                {
+                    Dictionary<string, dynamic>? filter = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(getParams.FilterModel.ToString()!, JsonSerializerOptions.Default);
+                    if(filter!=null && filter.Count >0 )
+                    {
+                        foreach(var field in filter.Keys)
+                        {
+                            Dictionary<string, dynamic>? filtervalues = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(filter[field]);
+
+                            if(filtervalues!=null && filtervalues.Count >0 && filtervalues.Keys.Contains("filter"))
+                            {
+                                string search = filtervalues["filter"]?.ToString();
+                                if(!string.IsNullOrEmpty(search))
+                                {
+                                    queryParams[field] = search;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                
+
 
                 // https://github.com/typicode/json-server#slice
                 url += $"?_start={getParams.StartRow}";
