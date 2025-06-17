@@ -45,6 +45,23 @@
     }
     else
     {
+
+        <FluentGrid Spacing="@spacing" AdaptiveRendering="true" Justify="@justify">
+            <FluentGridItem xs="3" Style="text-align:center; align-content:center">
+                <div >
+                    <FluentDatePicker Label="From Date" AriaLabel="From" @bind-Value="@dataSource.FromDate" @bind-Value:after="async () => await UpdateSearch()" />
+                </div>
+                
+
+            </FluentGridItem>
+            <FluentGridItem xs="3" Style="text-align:center; align-content:center">
+                <div>
+                    <FluentDatePicker Label="Till Date" AriaLabel="To" @bind-Value="@dataSource.TillDate" @bind-Value:after="async () => await UpdateSearch()" />
+                </div>
+                
+            </FluentGridItem>
+        </FluentGrid>
+
         <AgGrid @ref="photoGrid" WidthStyle="100%" HeightStyle="300px" Options="photoOp" Events="photoEv"
         ConfigureScript="fl_album_config">
             <GridColumn IsResizable="true" IsSortable="true" Header="ID" Field="id"  />
@@ -59,7 +76,10 @@
 
 
 @code {
-
+    private DateTime? fromDate = DateTime.Today.AddMonths(-1);
+    private DateTime? tillDate = DateTime.Today;
+    private int spacing = 1;
+    private JustifyContent justify = JustifyContent.FlexEnd;
     private AgGrid photoGrid;
     private PhotosDataSource dataSource;
     private GridOptions photoOp;
@@ -87,12 +107,14 @@
     {
         public IHttpClientFactory HttpFactory { get; set; }
         public string Search { get; set; } = string.Empty;
-
+        public DateTime? FromDate { get; set; }
+        public DateTime? TillDate { get; set; }
 
         public async Task GetRows(IGetRowsParams getParams)
         {
             try
             {
+                Console.WriteLine("from Date : " + FromDate + ", till Date: " + TillDate);
                 var url = "https://jsonplaceholder.typicode.com/photos";
                 Dictionary<string, string> queryParams = new Dictionary<string, string>();
 
@@ -117,7 +139,7 @@
                     }
 
                 }
-                
+
 
 
                 // https://github.com/typicode/json-server#slice
@@ -169,6 +191,7 @@
         }
     }
 
+
     // In Blazor Server-side hosting model ag-Grid Callbacks CANNOT be used
     // because they have to execute synchronously and only asynchronous
     // invocation across JS/.NET runtimes is supported in Blazor Server-side
@@ -176,15 +199,19 @@
 
     protected override void OnInitialized()
     {
-        dataSource = new PhotosDataSource { HttpFactory = HttpFactory };
+        //bind the date input to the data source after the initialization of this component
+        //such that the date input component will notify the change of datasource 
+        //when GetRows invoked from client
+        //blazor will have correct from date and till date in datasource for client to call
+        dataSource = new PhotosDataSource { HttpFactory = HttpFactory, FromDate=fromDate, TillDate = tillDate };
         var uri = NavMgr.BaseUri+ "/api/suggests/ray";
-        
+
         photoOp = new GridOptions
             {
-                //when Datasource is assigned, implicitly set event for preparing interop
-                //Please see GridOptions definition file .DataSource.cs
-                //In which the interop is dotref used for being invoked from JS's counterpart native DS
-                //please wrapper JS blazor-ag-grid.js line 10 and line 159 (create real DS counterpart )
+            //when Datasource is assigned, implicitly set event for preparing interop
+            //Please see GridOptions definition file .DataSource.cs
+            //In which the interop is dotref used for being invoked from JS's counterpart native DS
+            //please wrapper JS blazor-ag-grid.js line 10 and line 159 (create real DS counterpart )
                 Datasource = dataSource,
                 EnablePagination = false,
                 EnableRowDeselection = true,
@@ -260,7 +287,9 @@
     {
         if (newSearch != null)
             search = newSearch;
+
         dataSource.Search = search;
+
         await photoGrid.Api.PurgeInfiniteCache();
     }
 

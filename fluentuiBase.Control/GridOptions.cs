@@ -86,6 +86,9 @@ public partial class GridOptions
     ///   https://www.ag-grid.com/javascript-grid-tree-data/
     public bool? TreeData { get; set; }
 }
+
+
+
 [JsonConverter(typeof(EnumConverter))]
 public enum ColorScheme
 {

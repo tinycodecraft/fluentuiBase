@@ -31,7 +31,7 @@ public partial class GridOptions
         }
     }
     //when it's serialized and set to ag-grid instance by grid options, it will be invoked by ag-grid native script later
-    //blazor expose the methods with same method names through JSInvokable attribute
+    //blazor expose the methods with same method names through JSInvokable attribute (But not the instance properties)
     //such that ag-grid native script invoke them if needed.
     //Please note that reference passed to ag-grid must be DotNetObjectReference<[type having required methods for being invoked]> 
     [JsonPropertyName("datasource")]
